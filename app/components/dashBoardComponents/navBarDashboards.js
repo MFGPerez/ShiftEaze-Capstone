@@ -53,7 +53,6 @@ const NavBarDashboard = () => {
           <Link href="/dashboard" className="hover:text-blue-400 text-lg font-comfortaa">Home</Link>
           <Link href="/workers" className="hover:text-blue-400 text-lg font-comfortaa">Workers</Link>
           <Link href="/calendar?view=admin" className="hover:text-blue-400 text-lg font-comfortaa">Calendar</Link>
-          <Link href="/workersDashboard" className="hover:text-blue-400 text-lg font-comfortaa">Workers Dashboard</Link>
           <span className="mx-2"></span>
         </div>
         <div className="flex items-center space-x-6">
