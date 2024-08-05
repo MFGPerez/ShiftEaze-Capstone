@@ -18,7 +18,7 @@ const SupportNavBar = () => {
         <div className="text-xl font-rockSalt">ShiftEaze</div>
         <div className="flex space-x-6 items-center">
           <Link
-            href="/workersDashboard"
+            href="/punchinOut"
             className="bg-gray-500 text-white px-4 py-2 rounded-md inline-block shadow-md hover:bg-gray-600 border-2 border-transparent hover:border-gray-400 font-comfortaa font-semibold"
           >
             Back to Worker Search
