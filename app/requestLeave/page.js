@@ -1,15 +1,12 @@
 "use client";
 
-import React, { useState,  Suspense } from "react";
+import React, { useState, Suspense } from "react";
 import { getAuth } from "firebase/auth";
-import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { getFirestore, collection, addDoc, Timestamp } from "firebase/firestore";
 import { useRouter, useSearchParams } from "next/navigation";
 import { firebaseApp } from "utils/firebase";
-
 import { TextField, Button, Box, Typography } from "@mui/material";
 import SupportNavBar from "@/components/faqsContactManagerNavBar";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import styled from "styled-components";
@@ -40,12 +37,6 @@ const Title = styled.h2`
   margin-bottom: 20px;
   font-size: 24px;
   text-align: center;
-`;
-
-const DateRangePicker = styled.div`
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 20px;
 `;
 
 const ButtonStyled = styled(Button)`
@@ -100,15 +91,6 @@ const CustomCalendar = styled(Calendar)`
   }
 `;
 
-/**
- * RequestLeave Component
- *
- * This component provides a form for workers to request leave. It includes a calendar to select dates,
- * input fields for specifying additional notes, and handles form submission to send the leave request
- * to Firestore.
- *
- * @returns {JSX.Element} The RequestLeave component
- */
 const RequestLeaveComponent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -127,17 +109,28 @@ const RequestLeaveComponent = () => {
     setSelectedDates(dates);
   };
 
+  const formatDateRange = (dates) => {
+    if (dates.length === 2) {
+      return `${dates[0].toLocaleDateString()} to ${dates[1].toLocaleDateString()}`;
+    } else {
+      return dates[0].toLocaleDateString();
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus("Sending request...");
+
+    const dateRange = formatDateRange(selectedDates);
+    const messageContent = `Leave Request from ${firstName} ${lastName} for ${dateRange}. Reason: ${notes}`;
+
     try {
-      await addDoc(collection(db, "leaveRequests"), {
-        workerName: `${firstName} ${lastName}`,
-        managerId,
+      await addDoc(collection(db, "managers", managerId, "supportMessages"), {
+        name: `Leave Req - ${firstName} ${lastName}`,
         email: user.email,
-        selectedDates,
-        notes,
-        timestamp: new Date(),
+        message: messageContent,
+        timestamp: Timestamp.now(),
+        type: "leaveRequest",
       });
       setStatus("Leave request sent successfully.");
       setSelectedDates([]);
