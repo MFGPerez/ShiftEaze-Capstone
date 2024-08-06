@@ -54,7 +54,7 @@ const SendMsgPopup = ({ worker, onClose, message, setMessage, handleSendMsg }) =
         <AiOutlineClose size={24} />
       </button>
       <div className="text-black">
-        <h2 className="text-3xl font-comfortaa font-bold mb-4">Manager: Marcel Gallardo</h2>
+        <h2 className="text-3xl font-comfortaa font-bold mb-4">Manager</h2>
         <div className="mt-4">
           <p className="text-2xl font-comfortaa font-semibold mb-2">Message:</p>
           <textarea

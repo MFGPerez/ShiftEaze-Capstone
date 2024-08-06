@@ -62,7 +62,6 @@ const PageNavBar = () => {
           <Link href="/dashboard" className="hover:text-blue-400 text-lg font-comfortaa">Home</Link>
           <Link href="/workers" className="hover:text-blue-400 text-lg font-comfortaa">Workers</Link>
           <Link href="/calendar" className="hover:text-blue-400 text-lg font-comfortaa">Calendar</Link>
-          <Link href="/workersDashboard" className="hover:text-blue-400 text-lg font-comfortaa">Workers Dashboard</Link>
           {profilePic && (
             <img src={profilePic} alt="Profile" className="w-8 h-8 rounded-full" />
           )}
