@@ -44,9 +44,9 @@ const WorkersDashNavBar = () => {
       <div className="flex justify-between items-center px-5">
         <div className="text-2xl font-rockSalt mr-auto">ShiftEaze!</div>
         <div className="flex space-x-6 items-center">
-          <Link href="/calendar?view=worker" className="hover:text-blue-400 text-lg font-comfortaa">Calendar</Link>
-          <Link href="/contactManager" className="hover:text-blue-400 text-lg font-comfortaa">Contact Manager</Link>
-          <Link href="/requestLeave" className="hover:text-blue-400 text-lg font-comfortaa">Request Leave</Link>
+          <Link href={`/calendar?view=worker`} className="hover:text-blue-400 text-lg font-comfortaa">Calendar</Link>
+          <Link href={`/contactManager`} className="hover:text-blue-400 text-lg font-comfortaa">Contact Manager</Link>
+          <Link href={`/requestLeave?managerId=${auth.currentUser?.uid}&firstName=${auth.currentUser?.displayName?.split(' ')[0]}&lastName=${auth.currentUser?.displayName?.split(' ')[1]}`} className="hover:text-blue-400 text-lg font-comfortaa">Request Leave</Link>
           <Link
             href="/signin"
             className="font-comfortaa bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors border-2 border-transparent hover:border-red-400"
