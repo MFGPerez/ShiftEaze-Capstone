@@ -112,7 +112,7 @@ const App = () => {
       <NavBar />
       <main className="flex min-h-screen bg-gradient-to-r from-blue-500 via-blue-700 to-blue-500 items-center justify-between">
         <div className="w-6/12 h-screen flex flex-col justify-center items-center">
-          <h1 className="text-6xl text-white mb-6 font-rockSalt">ShiftEaze</h1>
+          <h1 className="text-6xl text-white mb-6 font-rockSalt">ShiftEaze!</h1>
           <p className="text-white text-lg font-nixie mb-4 text-center">
             Streamlining Workforce Management. Efficient scheduling and
             management for better productivity.
