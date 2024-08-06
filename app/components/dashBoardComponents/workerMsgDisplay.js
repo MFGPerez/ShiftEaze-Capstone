@@ -2,10 +2,12 @@
 
 import React, { useEffect, useState } from "react";
 import { getAuth } from "firebase/auth";
-import { getFirestore, collection, query, getDocs, deleteDoc, where } from "firebase/firestore";
+import { getFirestore, collection, query, getDocs, deleteDoc, where, doc } from "firebase/firestore";
 import { firebaseApp } from "utils/firebase";
 import { FaTrashAlt } from 'react-icons/fa';
 import { AiOutlineClose } from 'react-icons/ai';
+
+const MANAGER_ID = "6I3LZoawvIXm621XYJiavWT6bx12";
 
 const WorkerMsgDisplay = () => {
   const auth = getAuth(firebaseApp);
@@ -18,12 +20,7 @@ const WorkerMsgDisplay = () => {
     const fetchMessages = async () => {
       setLoading(true);
       try {
-        const user = auth.currentUser;
-        if (!user) {
-          console.error("User not signed in");
-          return;
-        }
-        const q = query(collection(db, "managers", user.uid, "supportMessages"));
+        const q = query(collection(db, "leaveRequests"), where("managerId", "==", MANAGER_ID));
         const querySnapshot = await getDocs(q);
         const messagesList = querySnapshot.docs.map((doc) => ({
           id: doc.id,
@@ -40,20 +37,10 @@ const WorkerMsgDisplay = () => {
     fetchMessages();
   }, [auth, db]);
 
-  const handleDelete = async (email) => {
+  const handleDelete = async (id) => {
     try {
-      const user = auth.currentUser;
-      if (!user) {
-        console.error("User not signed in");
-        return;
-      }
-
-      const q = query(collection(db, "managers", user.uid, "supportMessages"), where("email", "==", email));
-      const querySnapshot = await getDocs(q);
-      const deletePromises = querySnapshot.docs.map((doc) => deleteDoc(doc.ref));
-      await Promise.all(deletePromises);
-
-      setMessages(messages.filter(message => message.email !== email));
+      await deleteDoc(doc(db, "leaveRequests", id));
+      setMessages(messages.filter(message => message.id !== id));
     } catch (error) {
       console.error("Error deleting message: ", error);
     }
@@ -72,12 +59,21 @@ const WorkerMsgDisplay = () => {
     setSelectedMessage(null);
   };
 
+  const formatDateRange = (dates) => {
+    if (!dates || dates.length === 0) return "";
+    if (dates.length === 2) {
+      return `${dates[0].toDate().toLocaleDateString()} to ${dates[1].toDate().toLocaleDateString()}`;
+    } else {
+      return dates[0].toDate().toLocaleDateString();
+    }
+  };
+
   return (
-    <div className="w-full max-w-3xl"> {/* Extended width */}
+    <div className="w-full max-w-3xl">
       <div className="bg-gray-100 text-black text-center p-4 rounded-t-lg w-full">
         <h2 className="text-3xl font-comfortaa font-bold">Worker Messages</h2>
       </div>
-      <div className="bg-black opacity-90 p-7 rounded-b-lg shadow-lg w-full" style={{ height: '27rem' }}> {/* Custom height */}
+      <div className="bg-black opacity-90 p-7 rounded-b-lg shadow-lg w-full" style={{ height: '27rem' }}>
         {loading ? (
           <p className="text-white">Loading messages...</p>
         ) : (
@@ -85,24 +81,25 @@ const WorkerMsgDisplay = () => {
             {messages.length === 0 ? (
               <p className="text-white text-center">You have no support messages at this time.</p>
             ) : (
-              messages.map((msg, index) => (
+              messages.map((msg) => (
                 <div
-                  key={index}
+                  key={msg.id}
                   className="relative bg-blue-100 py-3 px-6 rounded-lg shadow hover:bg-blue-300 transition-colors border-2 border-transparent hover:border-blue-600 cursor-pointer"
                   onClick={() => handleView(msg)}
                 >
-                  <h2 className="text-2xl font-comfortaa font-semibold text-blue-900 mb-1">{msg.name}</h2>
-                  <p className="text-black font-nixie text-sm">{msg.message}</p>
-                  <p className="text-black font-nixie text-sm">Time: {msg.time}</p>
+                  <h2 className="text-2xl font-comfortaa font-semibold text-blue-900 mb-1">{msg.workerName} - Leave Req</h2>
+                  <p className="text-black font-nixie text-sm">{msg.notes}</p>
                   <p className="text-black font-nixie text-sm">Email: {msg.email}</p>
+                  <p className="text-black font-nixie text-sm">Dates: {formatDateRange(msg.selectedDates)}</p>
+                  <p className="text-black font-nixie text-sm">Time: {msg.time}</p>
                   <FaTrashAlt
                     className="absolute top-2 right-2 text-red-400 hover:text-red-700 cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleDelete(msg.email);
+                      handleDelete(msg.id);
                     }}
                   />
-                  {index < messages.length - 1 && <hr className="border-t border-black my-4" />}
+                  <hr className="border-t border-black my-4" />
                 </div>
               ))
             )}
@@ -114,16 +111,17 @@ const WorkerMsgDisplay = () => {
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-3xl relative">
             <button
               onClick={handleClosePopup}
-              className="absolute top-4 right-4  text-red-400 hover:text-red-700"
+              className="absolute top-4 right-4 text-red-400 hover:text-red-700"
             >
               <AiOutlineClose size={24} />
             </button>
             <div className="text-black">
-              <h2 className="text-3xl font-comfortaa font-bold mb-4">{selectedMessage.name}</h2>
+              <h2 className="text-3xl font-comfortaa font-bold mb-4">{selectedMessage.workerName} - Leave Req</h2>
               <div className="mt-4">
-                <p className="text-2xl font-nixie font-semibold mb-2">Message: {selectedMessage.message}</p>
+                <p className="text-2xl font-nixie font-semibold mb-2">Message: {selectedMessage.notes}</p>
               </div>
               <p className="text-xl font-comfortaa mb-1">Email: {selectedMessage.email}</p>
+              <p className="text-xl font-comfortaa mb-1">Dates: {formatDateRange(selectedMessage.selectedDates)}</p>
               <p className="text-xl font-comfortaa mb-1">Time: {selectedMessage.time}</p>
             </div>
           </div>

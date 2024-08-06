@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { getAuth } from "firebase/auth";
-import { getFirestore, collection, addDoc, Timestamp } from "firebase/firestore";
+import { getFirestore, collection, query, getDocs, addDoc, Timestamp, where } from "firebase/firestore";
 import { useRouter, useSearchParams } from "next/navigation";
 import { firebaseApp } from "utils/firebase";
 import { TextField, Button, Box, Typography } from "@mui/material";
@@ -94,9 +94,6 @@ const CustomCalendar = styled(Calendar)`
 const RequestLeaveComponent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const managerId = searchParams.get("managerId");
-  const firstName = searchParams.get("firstName");
-  const lastName = searchParams.get("lastName");
   const auth = getAuth(firebaseApp);
   const db = getFirestore(firebaseApp);
   const user = auth.currentUser;
@@ -104,33 +101,57 @@ const RequestLeaveComponent = () => {
   const [selectedDates, setSelectedDates] = useState([]);
   const [notes, setNotes] = useState("");
   const [status, setStatus] = useState("");
+  const [managerId, setManagerId] = useState("");
+  const [workerName, setWorkerName] = useState("");
+
+  useEffect(() => {
+    const fetchWorkerData = async () => {
+      if (!user) {
+        console.error("User not signed in");
+        return;
+      }
+
+      try {
+        const managersQuery = query(collection(db, "managers"));
+        const managersSnapshot = await getDocs(managersQuery);
+
+        for (const managerDoc of managersSnapshot.docs) {
+          const workersQuery = query(
+            collection(db, "managers", managerDoc.id, "workers"),
+            where("email", "==", user.email)
+          );
+          const workersSnapshot = await getDocs(workersQuery);
+          if (!workersSnapshot.empty) {
+            const workerData = workersSnapshot.docs[0].data();
+            setManagerId(managerDoc.id);
+            setWorkerName(`${workerData.firstName} ${workerData.lastName}`);
+            break;
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching worker data: ", error);
+      }
+    };
+
+    fetchWorkerData();
+  }, [auth, db, user]);
 
   const handleDateChange = (dates) => {
     setSelectedDates(dates);
-  };
-
-  const formatDateRange = (dates) => {
-    if (dates.length === 2) {
-      return `${dates[0].toLocaleDateString()} to ${dates[1].toLocaleDateString()}`;
-    } else {
-      return dates[0].toLocaleDateString();
-    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus("Sending request...");
 
-    const dateRange = formatDateRange(selectedDates);
-    const messageContent = `Leave Request from ${firstName} ${lastName} for ${dateRange}. Reason: ${notes}`;
-
     try {
-      await addDoc(collection(db, "managers", managerId, "supportMessages"), {
-        name: `Leave Req - ${firstName} ${lastName}`,
+      await addDoc(collection(db, "leaveRequests"), {
+        workerName: workerName,
         email: user.email,
-        message: messageContent,
+        managerId: managerId,
+        notes: notes,
+        selectedDates: selectedDates.map(date => Timestamp.fromDate(date)),
         timestamp: Timestamp.now(),
-        type: "leaveRequest",
       });
       setStatus("Leave request sent successfully.");
       setSelectedDates([]);
