@@ -1,41 +1,25 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
-import {
-  format,
-  addMonths,
-  subMonths,
-  startOfMonth,
-  endOfMonth,
-  eachDayOfInterval,
-  parse,
-} from "date-fns";
-import CalendarGrid from "./calendarGrid";
-import ScheduleBlockCreator from "./scheduleBlockCreator";
-import WorkersDisplay from "./workersDisplay";
-import { WorkersProvider, useWorkers } from "./workersContext";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
-import { AiOutlineDownload, AiOutlineUpload } from "react-icons/ai";
-import * as XLSX from "xlsx";
-import { getAuth } from "firebase/auth";
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDocs,
-  doc,
-  updateDoc,
-  deleteDoc,
-} from "firebase/firestore";
-import { firebaseApp } from "utils/firebase";
-import { useSearchParams } from "next/navigation";
+import React, { useState, useEffect, useRef } from 'react';
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, parse } from 'date-fns';
+import CalendarGrid from './calendarGrid';
+import ScheduleBlockCreator from './scheduleBlockCreator';
+import WorkersDisplay from './workersDisplay';
+import { WorkersProvider, useWorkers } from './workersContext';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { AiOutlineDownload, AiOutlineUpload } from 'react-icons/ai';
+import * as XLSX from 'xlsx';
+import { getAuth } from 'firebase/auth';
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { firebaseApp } from 'utils/firebase';
+import { useSearchParams } from 'next/navigation';
 
 const HorizontalCalendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [blocks, setBlocks] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedJobTitle, setSelectedJobTitle] = useState("");
-  const [mode, setMode] = useState("admin");
+  const [selectedJobTitle, setSelectedJobTitle] = useState('');
+  const [mode, setMode] = useState('admin');
   const [isButtonVisible, setIsButtonVisible] = useState(false);
   const hideButtonTimeout = useRef(null);
   const { workers } = useWorkers();
@@ -47,11 +31,11 @@ const HorizontalCalendar = () => {
   const db = getFirestore(firebaseApp);
 
   useEffect(() => {
-    const view = searchParams.get("view");
-    if (view === "worker") {
-      setMode("worker");
-    } else if (view === "admin") {
-      setMode("admin");
+    const view = searchParams.get('view');
+    if (view === 'worker') {
+      setMode('worker');
+    } else if (view === 'admin') {
+      setMode('admin');
     }
   }, [searchParams]);
 
@@ -125,11 +109,8 @@ const HorizontalCalendar = () => {
       const user = auth.currentUser;
       if (!user) return;
 
-      const managerDocRef =
-        mode === "worker"
-          ? doc(db, "managers", searchParams.get("managerId"))
-          : doc(db, "managers", user.uid);
-      const scheduleCollectionRef = collection(managerDocRef, "schedule");
+      const managerDocRef = mode === 'worker' ? doc(db, 'managers', searchParams.get('managerId')) : doc(db, 'managers', user.uid);
+      const scheduleCollectionRef = collection(managerDocRef, 'schedule');
       const querySnapshot = await getDocs(scheduleCollectionRef);
 
       querySnapshot.forEach(async (doc) => {
@@ -167,7 +148,7 @@ const HorizontalCalendar = () => {
             }
           : block
       );
-      saveBlockToFirebase(updatedBlocks.find((block) => block.id === id));
+      saveBlockToFirebase(updatedBlocks.find(block => block.id === id));
       return updatedBlocks;
     });
   };
@@ -176,11 +157,8 @@ const HorizontalCalendar = () => {
     const user = auth.currentUser;
     if (!user) return;
 
-    const managerDocRef =
-      mode === "worker"
-        ? doc(db, "managers", searchParams.get("managerId"))
-        : doc(db, "managers", user.uid);
-    const scheduleCollectionRef = collection(managerDocRef, "schedule");
+    const managerDocRef = mode === 'worker' ? doc(db, 'managers', searchParams.get('managerId')) : doc(db, 'managers', user.uid);
+    const scheduleCollectionRef = collection(managerDocRef, 'schedule');
 
     try {
       const querySnapshot = await getDocs(scheduleCollectionRef);
@@ -219,21 +197,14 @@ const HorizontalCalendar = () => {
     const user = auth.currentUser;
     if (!user) return;
 
-    const managerDocRef =
-      mode === "worker"
-        ? doc(db, "managers", searchParams.get("managerId"))
-        : doc(db, "managers", user.uid);
-    const scheduleCollectionRef = collection(managerDocRef, "schedule");
+    const managerDocRef = mode === 'worker' ? doc(db, 'managers', searchParams.get('managerId')) : doc(db, 'managers', user.uid);
+    const scheduleCollectionRef = collection(managerDocRef, 'schedule');
 
     try {
       const querySnapshot = await getDocs(scheduleCollectionRef);
       const blocks = querySnapshot.docs
         .map((doc) => doc.data())
-        .filter(
-          (block) =>
-            block.jobTitle === jobTitle &&
-            block.startDate.startsWith(format(currentDate, "yyyy-MM"))
-        )
+        .filter((block) => block.jobTitle === jobTitle && block.startDate.startsWith(format(currentDate, 'yyyy-MM')))
         .map((block) => ({
           ...block,
           startDate: new Date(block.startDate),
@@ -247,43 +218,32 @@ const HorizontalCalendar = () => {
 
   const exportToExcel = () => {
     const formatTime = (time) => {
-      const [hour, minute] = time.split(":");
+      const [hour, minute] = time.split(':');
       const date = new Date(0, 0, 0, hour, minute);
-      return format(date, "h:mm a");
+      return format(date, 'h:mm a');
     };
 
-    const data = blocks.map((block) => {
+    const data = blocks.map(block => {
       return {
         JobTitle: block.jobTitle,
         DisplayRow: block.row + 1,
-        ProfilePicture: block.employee.photoURL
-          ? block.employee.photoURL
-          : "None",
+        ProfilePicture: block.employee.photoURL ? block.employee.photoURL : 'None',
         FirstName: block.employee.firstName,
         LastName: block.employee.lastName,
         BlockType: block.type,
-        StartTime:
-          block.type !== "Vacation Block"
-            ? formatTime(block.startTime)
-            : "Not Applicable",
-        EndTime:
-          block.type !== "Vacation Block"
-            ? formatTime(block.endTime)
-            : "Not Applicable",
-        StartDate: format(new Date(block.startDate), "MMMM d, yyyy"),
-        EndDate: format(new Date(block.endDate), "MMMM d, yyyy"),
-        GridRow: block.row + 1,
+        StartTime: block.type !== 'Vacation Block' ? formatTime(block.startTime) : 'Not Applicable',
+        EndTime: block.type !== 'Vacation Block' ? formatTime(block.endTime) : 'Not Applicable',
+        StartDate: format(new Date(block.startDate), 'MMMM d, yyyy'),
+        EndDate: format(new Date(block.endDate), 'MMMM d, yyyy'),
+        GridRow: block.row + 1
       };
     });
 
     const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Schedule");
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Schedule');
 
-    const fileName = `${selectedJobTitle}-${format(
-      currentDate,
-      "dd-MMMM-yyyy"
-    )}-Schedule.xlsx`;
+    const fileName = `${selectedJobTitle}-${format(currentDate, 'dd-MMMM-yyyy')}-Schedule.xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
 
@@ -294,30 +254,29 @@ const HorizontalCalendar = () => {
     const reader = new FileReader();
     reader.onload = async (event) => {
       const data = new Uint8Array(event.target.result);
-      const workbook = XLSX.read(data, { type: "array" });
+      const workbook = XLSX.read(data, { type: 'array' });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
       const parseTime = (time) => {
-        if (time === "Not Applicable") return null;
-        const date = parse(time, "h:mm a", new Date());
-        return format(date, "HH:mm");
+        if (time === 'Not Applicable') return null;
+        const date = parse(time, 'h:mm a', new Date());
+        return format(date, 'HH:mm');
       };
 
       if (validateImportedData(jsonData)) {
-        const importedBlocks = jsonData.map((item) => ({
+        const importedBlocks = jsonData.map(item => ({
           id: `${Date.now()}-${Math.random()}`,
           type: item.BlockType,
-          startDate: parse(item.StartDate, "MMMM d, yyyy", new Date()),
-          endDate: parse(item.EndDate, "MMMM d, yyyy", new Date()),
+          startDate: parse(item.StartDate, 'MMMM d, yyyy', new Date()),
+          endDate: parse(item.EndDate, 'MMMM d, yyyy', new Date()),
           startTime: parseTime(item.StartTime),
           endTime: parseTime(item.EndTime),
           employee: {
             firstName: item.FirstName,
             lastName: item.LastName,
-            photoURL:
-              item.ProfilePicture !== "None" ? item.ProfilePicture : null,
+            photoURL: item.ProfilePicture !== 'None' ? item.ProfilePicture : null
           },
           row: item.GridRow - 1,
           jobTitle: selectedJobTitle,
@@ -331,9 +290,7 @@ const HorizontalCalendar = () => {
           return [...prevBlocks, ...importedBlocks];
         });
       } else {
-        alert(
-          "Invalid file format. Please upload a valid schedule spreadsheet."
-        );
+        alert('Invalid file format. Please upload a valid schedule spreadsheet.');
       }
     };
 
@@ -341,21 +298,8 @@ const HorizontalCalendar = () => {
   };
 
   const validateImportedData = (data) => {
-    const requiredColumns = [
-      "DisplayRow",
-      "ProfilePicture",
-      "FirstName",
-      "LastName",
-      "BlockType",
-      "StartTime",
-      "EndTime",
-      "StartDate",
-      "EndDate",
-      "GridRow",
-    ];
-    return data.every((item) =>
-      requiredColumns.every((column) => item.hasOwnProperty(column))
-    );
+    const requiredColumns = ['DisplayRow', 'ProfilePicture', 'FirstName', 'LastName', 'BlockType', 'StartTime', 'EndTime', 'StartDate', 'EndDate', 'GridRow'];
+    return data.every(item => requiredColumns.every(column => item.hasOwnProperty(column)));
   };
 
   useEffect(() => {
@@ -374,10 +318,10 @@ const HorizontalCalendar = () => {
       }
     };
 
-    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener('mousemove', handleMouseMove);
 
     return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener('mousemove', handleMouseMove);
       if (hideButtonTimeout.current) {
         clearTimeout(hideButtonTimeout.current);
       }
@@ -406,7 +350,7 @@ const HorizontalCalendar = () => {
               >
                 Next Month
               </button>
-              {mode === "admin" && (
+              {mode === 'admin' && (
                 <>
                   <button
                     className="font-comfortaa font-semibold flex items-center bg-orange-500 text-white px-1 py-1 rounded-lg hover:bg-orange-600 ml-5 border-2 border-transparent hover:border-orange-400"
@@ -415,7 +359,9 @@ const HorizontalCalendar = () => {
                     Excel Export
                     <AiOutlineUpload size={24} />
                   </button>
-                  <label className="font-comfortaa font-semibold flex items-center bg-orange-500 text-white px-1 py-1 rounded-lg hover:bg-orange-600 ml-5 cursor-pointer border-2 border-transparent hover:border-orange-400">
+                  <label
+                    className="font-comfortaa font-semibold flex items-center bg-orange-500 text-white px-1 py-1 rounded-lg hover:bg-orange-600 ml-5 cursor-pointer border-2 border-transparent hover:border-orange-400"
+                  >
                     Excel Import
                     <AiOutlineDownload size={24} />
                     <input
@@ -450,20 +396,16 @@ const HorizontalCalendar = () => {
                   key={i}
                   className={`relative w-[80px] h-[80px] flex flex-col justify-center items-center border border-gray-300 cursor-pointer hover:bg-blue-200 hover:text-blue-800 ${
                     selectedDate &&
-                    format(date, "yyyy-MM-dd") ===
-                      format(selectedDate, "yyyy-MM-dd")
+                    format(date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd")
                       ? "bg-blue-800 text-white"
                       : "bg-gray-200"
                   }`}
                   onClick={() => handleDateClick(date)}
                 >
-                  <p className="m-0 text-lg font-bold">
-                    {daysOfWeek[date.getDay()]}
-                  </p>
+                  <p className="m-0 text-lg font-bold">{daysOfWeek[date.getDay()]}</p>
                   <p className="m-0 text-lg font-bold">{format(date, "d")}</p>
                   {selectedDate &&
-                    format(date, "yyyy-MM-dd") ===
-                      format(selectedDate, "yyyy-MM-dd") && (
+                    format(date, "yyyy-MM-dd") === format(selectedDate, "yyyy-MM-dd") && (
                       <div className="absolute bottom-0 left-0 right-0 h-1 bg-red-600"></div>
                     )}
                 </div>
@@ -486,9 +428,7 @@ const HorizontalCalendar = () => {
                     block.id === id ? { ...block, startDate, endDate } : block
                   );
                   setBlocks(updatedBlocks);
-                  saveBlocksToFirebase(
-                    updatedBlocks.find((block) => block.id === id)
-                  );
+                  saveBlockToFirebase(updatedBlocks.find(block => block.id === id));
                 }}
                 mode={mode}
               />

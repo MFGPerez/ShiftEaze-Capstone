@@ -1,23 +1,17 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { MdOutlineEdit, MdDeleteOutline } from "react-icons/md";
-import { AiOutlineClose } from "react-icons/ai";
-import { HiOutlineChevronDoubleRight } from "react-icons/hi";
-import {
-  format,
-  parseISO,
-  differenceInDays,
-  getMonth,
-  endOfMonth,
-} from "date-fns";
-import { useDrag, useDrop } from "react-dnd";
+import React, { useState, useEffect } from 'react';
+import { MdOutlineEdit, MdDeleteOutline } from 'react-icons/md';
+import { AiOutlineClose } from 'react-icons/ai';
+import { HiOutlineChevronDoubleRight } from 'react-icons/hi';
+import { format, parseISO, differenceInDays, getMonth, endOfMonth } from 'date-fns';
+import { useDrag, useDrop } from 'react-dnd';
 
 /**
  * ScheduleVacationDayBlock Component
- *
+ * 
  * This component represents a vacation day schedule block with drag-and-drop functionality.
  * It displays details about the schedule block and allows editing and deleting the block.
- *
+ * 
  * @param {Object} props - The component props
  * @param {string} props.id - The unique identifier for the block
  * @param {Date} props.startDate - The start date of the block
@@ -45,7 +39,7 @@ const ScheduleVacationDayBlock = ({
   col,
   updateBlock,
   employee,
-  mode,
+  mode
 }) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -73,12 +67,12 @@ const ScheduleVacationDayBlock = ({
 
   const handleDoneClick = () => {
     setIsEditing(false);
-    if (typeof updateBlock === "function") {
+    if (typeof updateBlock === 'function') {
       updateBlock(id, startDate, endDate);
     }
   };
 
-  const formatDate = (date) => format(date, "d, MMMM, yyyy");
+  const formatDate = (date) => format(date, 'd, MMMM, yyyy');
 
   const calculateWidth = () => {
     const minDays = 1; // Minimum of 1 day
@@ -92,16 +86,16 @@ const ScheduleVacationDayBlock = ({
   const isMultiMonth = getMonth(startDate) !== getMonth(endDate);
 
   const [{ isDragging }, drag] = useDrag({
-    type: "BLOCK",
-    item: { id, type: "BLOCK", startCol: col, row },
-    canDrag: mode === "admin", // Only draggable in admin mode
+    type: 'BLOCK',
+    item: { id, type: 'BLOCK', startCol: col, row },
+    canDrag: mode === 'admin', // Only draggable in admin mode
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
   });
 
   const [, drop] = useDrop({
-    accept: "BLOCK",
+    accept: 'BLOCK',
     drop: (item, monitor) => {
       const delta = monitor.getDifferenceFromInitialOffset();
       if (!delta) return;
@@ -141,33 +135,23 @@ const ScheduleVacationDayBlock = ({
   };
 
   return (
-    <div
-      ref={(node) => drag(drop(node))}
-      className="relative"
-      style={{ opacity: isDragging ? 0.5 : 1 }}
-    >
+    <div ref={(node) => drag(drop(node))} className="relative" style={{ opacity: isDragging ? 0.5 : 1 }}>
       <button
         onClick={handleButtonClick}
         className="inline-block px-4 py-2 cursor-pointer relative outline-none rounded-lg text-lg h-[80px] flex flex-col items-start justify-center pl-4 transition-all"
         style={{
-          backgroundColor: "rgba(205, 92, 92, 0.5)", // Darker translucent red
-          border: "2px solid rgba(205, 92, 92, 0.8)", // Darker red border
+          backgroundColor: 'rgba(205, 92, 92, 0.5)', // Darker translucent red
+          border: '2px solid rgba(205, 92, 92, 0.8)', // Darker red border
           width: calculateWidth(),
-          color: "rgba(205, 92, 92, 0.85)", // Slightly darker text
-          fontWeight: "bold", // Make text bold
+          color: 'rgba(205, 92, 92, 0.85)', // Slightly darker text
+          fontWeight: 'bold', // Make text bold
         }}
       >
         <span className="block">Vacation</span>
         {employee && (
           <div className="flex items-center mt-1">
-            <img
-              src={employee.photoURL}
-              alt="profile"
-              className="w-6 h-6 rounded-full mr-2"
-            />
-            <span className="text-xs">
-              {employee.firstName} {employee.lastName}
-            </span>
+            <img src={employee.photoURL} alt="profile" className="w-6 h-6 rounded-full mr-2" />
+            <span className="text-xs">{employee.firstName} {employee.lastName}</span>
           </div>
         )}
         {isMultiMonth && (
@@ -181,32 +165,20 @@ const ScheduleVacationDayBlock = ({
         <div className="absolute text-black left-0 top-[60px] w-[280px] bg-white border border-white p-4 shadow-md z-50 rounded-lg">
           <div className="flex justify-between items-start">
             <div>
-              <div className="font-bold text-xl text-black">
-                Vacation{" "}
-                <span className="inline-block w-3 h-3 rounded-full bg-red-600 ml-2"></span>
-              </div>
+              <div className="font-bold text-xl text-black">Vacation <span className="inline-block w-3 h-3 rounded-full bg-red-600 ml-2"></span></div>
             </div>
             <div className="flex space-x-2">
-              {mode === "admin" && (
+              {mode === 'admin' && (
                 <>
-                  <button
-                    onClick={handleEditClick}
-                    className="text-black hover:text-blue-600"
-                  >
+                  <button onClick={handleEditClick} className="text-black hover:text-blue-600">
                     <MdOutlineEdit />
                   </button>
-                  <button
-                    onClick={onDelete}
-                    className="text-black hover:text-blue-600"
-                  >
+                  <button onClick={onDelete} className="text-black hover:text-blue-600">
                     <MdDeleteOutline />
                   </button>
                 </>
               )}
-              <button
-                onClick={handleClosePopup}
-                className="text-black hover:text-blue-600"
-              >
+              <button onClick={handleClosePopup} className="text-black hover:text-blue-600">
                 <AiOutlineClose />
               </button>
             </div>
@@ -215,29 +187,21 @@ const ScheduleVacationDayBlock = ({
           {isEditing && (
             <div className="mt-4">
               <div className="mb-2">
-                <label className="block text-black font-bold mb-1">
-                  Start Date
-                </label>
+                <label className="block text-black font-bold mb-1">Start Date</label>
                 <input
                   type="date"
                   className="w-full p-2 border border-black rounded-lg"
-                  value={format(startDate, "yyyy-MM-dd")}
-                  onChange={(e) =>
-                    handleStartDateChange(parseISO(e.target.value))
-                  }
+                  value={format(startDate, 'yyyy-MM-dd')}
+                  onChange={(e) => handleStartDateChange(parseISO(e.target.value))}
                 />
               </div>
               <div className="mb-2">
-                <label className="block text-black font-bold mb-1">
-                  End Date
-                </label>
+                <label className="block text-black font-bold mb-1">End Date</label>
                 <input
                   type="date"
                   className="w-full p-2 border border-black rounded-lg"
-                  value={format(endDate, "yyyy-MM-dd")}
-                  onChange={(e) =>
-                    handleEndDateChange(parseISO(e.target.value))
-                  }
+                  value={format(endDate, 'yyyy-MM-dd')}
+                  onChange={(e) => handleEndDateChange(parseISO(e.target.value))}
                 />
               </div>
               <div className="flex justify-end">
@@ -255,8 +219,7 @@ const ScheduleVacationDayBlock = ({
             <>
               <div className="mt-4 text-black font-bold">On Vacation:</div>
               <div className="text-black">
-                {startDate ? formatDate(startDate) : "Not set"} -{" "}
-                {endDate ? formatDate(endDate) : "Not set"}
+                {startDate ? formatDate(startDate) : 'Not set'} - {endDate ? formatDate(endDate) : 'Not set'}
               </div>
             </>
           )}
