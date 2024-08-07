@@ -6,24 +6,18 @@ import { getAuth } from "firebase/auth";
 import { firebaseApp } from 'utils/firebase';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 
-/**
- * WorkersDashNavBar Component
- * 
- * This component renders the navigation bar for the worker's dashboard in the ShiftEaze application.
- * It includes navigation links to the calendar and contact manager sections.
- * It also displays the user's profile picture if available.
- * 
- * @returns {JSX.Element} The WorkersDashNavBar component
- */
 const WorkersDashNavBar = () => {
   const auth = getAuth(firebaseApp);
   const db = getFirestore(firebaseApp);
   const [profilePic, setProfilePic] = useState("");
+  const [managerId, setManagerId] = useState("");
 
-  /**
-   * Fetches the user's profile picture from Firestore.
-   */
   useEffect(() => {
+    const storedManagerId = localStorage.getItem('managerId');
+    if (storedManagerId) {
+      setManagerId(storedManagerId);
+    }
+
     const fetchUserProfilePic = async () => {
       const user = auth.currentUser;
       if (user) {
@@ -44,9 +38,8 @@ const WorkersDashNavBar = () => {
       <div className="flex justify-between items-center px-5">
         <div className="text-2xl font-rockSalt mr-auto">ShiftEaze!</div>
         <div className="flex space-x-6 items-center">
-          <Link href={`/calendar?view=worker`} className="hover:text-blue-400 text-lg font-comfortaa">Calendar</Link>
-          <Link href={`/contactManager`} className="hover:text-blue-400 text-lg font-comfortaa">Contact Manager</Link>
-          <Link href={`/requestLeave?managerId=${auth.currentUser?.uid}&firstName=${auth.currentUser?.displayName?.split(' ')[0]}&lastName=${auth.currentUser?.displayName?.split(' ')[1]}`} className="hover:text-blue-400 text-lg font-comfortaa">Request Leave</Link>
+          <Link href={`/calendar?view=worker&managerId=${managerId}`} className="hover:text-blue-400 text-lg font-comfortaa">Calendar</Link>
+          <Link href={`/requestLeave?managerId=${managerId}&firstName=${auth.currentUser?.displayName?.split(' ')[0]}&lastName=${auth.currentUser?.displayName?.split(' ')[1]}`} className="hover:text-blue-400 text-lg font-comfortaa">Request Leave</Link>
           <Link
             href="/signin"
             className="font-comfortaa bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors border-2 border-transparent hover:border-red-400"

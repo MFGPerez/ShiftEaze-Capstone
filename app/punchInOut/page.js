@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useEffect, Suspense } from "react";
 import { getAuth } from "firebase/auth";
 import Image from "next/image";
@@ -20,9 +21,6 @@ import WorkersDashNavBar from "@components/workersDashNavBar";
 const PunchInOutComponent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const managerId = searchParams.get("managerId");
-  const firstName = searchParams.get("firstName");
-  const lastName = searchParams.get("lastName");
   const auth = getAuth(firebaseApp);
   const db = getFirestore(firebaseApp);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -35,6 +33,14 @@ const PunchInOutComponent = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [popupMessage, setPopupMessage] = useState(null);
+
+  // Retrieve managerId and worker's name from query parameters or localStorage
+  const managerId =
+    searchParams.get("managerId") || localStorage.getItem("managerId");
+  const firstName =
+    searchParams.get("firstName") || localStorage.getItem("firstName");
+  const lastName =
+    searchParams.get("lastName") || localStorage.getItem("lastName");
 
   useEffect(() => {
     const fetchWorker = async () => {
@@ -57,6 +63,11 @@ const PunchInOutComponent = () => {
           const workerDoc = workersSnapshot.docs[0];
           const workerData = workerDoc.data();
           setWorker(workerData);
+
+          // Store managerId and worker's name in localStorage
+          localStorage.setItem("managerId", managerId);
+          localStorage.setItem("firstName", firstName);
+          localStorage.setItem("lastName", lastName);
 
           if (workerData.punchInTime) {
             setPunchInTime(workerData.punchInTime.toDate());
@@ -255,7 +266,8 @@ const PunchInOutComponent = () => {
           <>
             <div className="bg-gray-100 p-4 rounded-t-lg shadow-lg text-center">
               <h2 className="text-black text-3xl font-comfortaa font-bold mb-5">
-                Welcome, {worker ? worker.firstName : "Worker"} {worker ? worker.lastName : "Worker"}
+                Welcome, {worker ? worker.firstName : "Worker"}{" "}
+                {worker ? worker.lastName : ""}
               </h2>
             </div>
             <div className="bg-black opacity-95 p-10 rounded-b-lg shadow-lg w-full text-black">

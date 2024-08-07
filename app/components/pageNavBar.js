@@ -57,7 +57,7 @@ const PageNavBar = () => {
   return (
     <nav className="bg-black opacity-85 text-white py-4 w-full">
       <div className="flex justify-between items-center px-4">
-        <div className="text-2xl font-rockSalt mr-auto">ShiftEaze</div>
+        <div className="text-2xl font-rockSalt mr-auto">ShiftEaze!</div>
         <div className="flex space-x-6 items-center">
           <Link href="/dashboard" className="hover:text-blue-400 text-lg font-comfortaa">Home</Link>
           <Link href="/workers" className="hover:text-blue-400 text-lg font-comfortaa">Workers</Link>

@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { getAuth, signOut } from "firebase/auth";
@@ -42,7 +41,7 @@ const WorkersDashNavBar = () => {
   return (
     <nav className="bg-black opacity-95 text-white py-4 w-full">
       <div className="flex justify-between items-center px-4">
-        <div className="text-2xl font-rockSalt mr-auto">ShiftEaze</div>
+        <div className="text-2xl font-rockSalt mr-auto">ShiftEaze!</div>
         <div className="flex space-x-6 items-center">
           <Link href="/calendar?view=worker" className="hover:text-blue-400 text-lg font-comfortaa">Calendar</Link>
           <Link href="/contactManager" className="hover:text-blue-400 text-lg font-comfortaa">Contact Manager</Link>

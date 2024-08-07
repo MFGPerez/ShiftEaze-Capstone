@@ -2,12 +2,10 @@
 
 import React, { useEffect, useState } from "react";
 import { getAuth } from "firebase/auth";
-import { getFirestore, collection, query, getDocs, deleteDoc, where, doc } from "firebase/firestore";
+import { getFirestore, collection, query, getDocs, deleteDoc, where, doc, getDoc } from "firebase/firestore";
 import { firebaseApp } from "utils/firebase";
 import { FaTrashAlt } from 'react-icons/fa';
 import { AiOutlineClose } from 'react-icons/ai';
-
-const MANAGER_ID = "6I3LZoawvIXm621XYJiavWT6bx12";
 
 const WorkerMsgDisplay = () => {
   const auth = getAuth(firebaseApp);
@@ -15,12 +13,32 @@ const WorkerMsgDisplay = () => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedMessage, setSelectedMessage] = useState(null);
+  const [managerId, setManagerId] = useState("");
 
   useEffect(() => {
+    const fetchManagerId = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        const managerDocRef = doc(db, "managers", user.uid);
+        const managerDocSnap = await getDoc(managerDocRef);
+        if (managerDocSnap.exists()) {
+          setManagerId(managerDocSnap.id);
+        } else {
+          console.error("Manager document not found");
+        }
+      }
+    };
+
+    fetchManagerId();
+  }, [auth, db]);
+
+  useEffect(() => {
+    if (!managerId) return;
+
     const fetchMessages = async () => {
       setLoading(true);
       try {
-        const q = query(collection(db, "leaveRequests"), where("managerId", "==", MANAGER_ID));
+        const q = query(collection(db, "leaveRequests"), where("managerId", "==", managerId));
         const querySnapshot = await getDocs(q);
         const messagesList = querySnapshot.docs.map((doc) => ({
           id: doc.id,
@@ -35,7 +53,7 @@ const WorkerMsgDisplay = () => {
     };
 
     fetchMessages();
-  }, [auth, db]);
+  }, [managerId, db]);
 
   const handleDelete = async (id) => {
     try {
@@ -84,7 +102,9 @@ const WorkerMsgDisplay = () => {
               messages.map((msg) => (
                 <div
                   key={msg.id}
-                  className="relative bg-blue-100 py-3 px-6 rounded-lg shadow hover:bg-blue-300 transition-colors border-2 border-transparent hover:border-blue-600 cursor-pointer"
+                  className={`relative py-3 px-6 rounded-lg shadow transition-colors border-2 cursor-pointer ${
+                    msg.toBeDeleted === "Yes" ? "bg-red-100 border-red-600" : "bg-blue-100 hover:bg-blue-300 border-transparent hover:border-blue-600"
+                  }`}
                   onClick={() => handleView(msg)}
                 >
                   <h2 className="text-2xl font-comfortaa font-semibold text-blue-900 mb-1">{msg.workerName} - Leave Req</h2>

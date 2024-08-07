@@ -2,27 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { parseISO, format, startOfMonth, endOfMonth } from 'date-fns';
 import { AiOutlineClose } from 'react-icons/ai';
-import { getFirestore, collection, getDocs } from 'firebase/firestore';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, collection, getDocs, doc, addDoc, deleteDoc, query, where } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 import { firebaseApp } from 'utils/firebase';
 import { useWorkers } from './workersContext';
+import { useSearchParams } from 'next/navigation';
 
-/**
- * ScheduleBlockCreator Component
- * 
- * This component allows the creation of schedule blocks for employees.
- * It fetches employees from Firestore and provides options to create full day, off day, or vacation blocks.
- * 
- * @param {Object} props - The props object
- * @param {Function} props.addBlockToGrid - Function to add a block to the grid
- * @param {Array} props.existingBlocks - Existing schedule blocks
- * @param {Date} props.currentMonth - Current month date object
- * @param {String} props.mode - User mode (admin or worker)
- * @param {String} props.selectedJobTitle - Selected job title for filtering employees
- * @param {Function} props.setSelectedJobTitle - Function to set selected job title
- * @param {Function} props.setBlocks - Function to set blocks state
- * @returns {JSX.Element} The ScheduleBlockCreator component
- */
 const ScheduleBlockCreator = ({
   addBlockToGrid,
   existingBlocks,
@@ -46,6 +31,8 @@ const ScheduleBlockCreator = ({
 
   const db = getFirestore(firebaseApp);
   const auth = getAuth(firebaseApp);
+  const searchParams = useSearchParams();
+  const managerId = searchParams.get('managerId');
 
   useEffect(() => {
     const firstDayOfMonth = format(startOfMonth(currentMonth), 'yyyy-MM-dd');
@@ -57,32 +44,36 @@ const ScheduleBlockCreator = ({
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const user = auth.currentUser;
-        if (user) {
-          const querySnapshot = await getDocs(collection(db, 'managers', user.uid, 'workers'));
-          const employeeList = querySnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-            displayName: `${doc.data().firstName} ${doc.data().lastName}`
-          }));
-          setEmployees(employeeList);
+        let querySnapshot;
+        if (mode === 'worker' && managerId) {
+          querySnapshot = await getDocs(collection(db, 'managers', managerId, 'workers'));
+        } else if (mode === 'admin') {
+          const user = auth.currentUser;
+          if (user) {
+            querySnapshot = await getDocs(collection(db, 'managers', user.uid, 'workers'));
+          } else {
+            setError('User not authenticated.');
+            return;
+          }
         } else {
-          setError('User not authenticated.');
+          setError('Manager ID not found.');
+          return;
         }
+        
+        const employeeList = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+          displayName: `${doc.data().firstName} ${doc.data().lastName}`
+        }));
+        setEmployees(employeeList);
       } catch (error) {
         setError('Failed to fetch employees. Check your permissions.');
         console.error('Error fetching employees:', error);
       }
     };
 
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        fetchEmployees();
-      } else {
-        setError('User not authenticated.');
-      }
-    });
-  }, [db, auth]);
+    fetchEmployees();
+  }, [db, auth, mode, managerId]);
 
   useEffect(() => {
     if (selectedJobTitle) {
@@ -99,7 +90,7 @@ const ScheduleBlockCreator = ({
     setShowDeleteAll(false);
   };
 
-  const handleDoneClick = () => {
+  const handleDoneClick = async () => {
     if (!startDate || !endDate) return;
     if ((selectedBlockType === 'Full Day Block' || selectedBlockType === 'Off Day Block') && (!startTime || !endTime)) return;
     if (!selectedEmployee) return;
@@ -119,10 +110,11 @@ const ScheduleBlockCreator = ({
         photoURL: employee.photoURL || 'None'
       },
       row: 0,
+      jobTitle: selectedJobTitle,
     };
 
     addBlockToGrid(newBlock);
-    saveBlocksToLocalStorage([...existingBlocks, newBlock]);
+    await saveBlockToFirebase(newBlock);
     resetForm();
     setShowDeleteAll(true);
   };
@@ -137,14 +129,66 @@ const ScheduleBlockCreator = ({
     setShowDeleteAll(true);
   };
 
-  const saveBlocksToLocalStorage = (blocks) => {
-    const key = `${selectedJobTitle}-${format(currentMonth, 'yyyy-MM')}`;
-    localStorage.setItem(`scheduleBlocks-${key}`, JSON.stringify(blocks));
+  const saveBlockToFirebase = async (block) => {
+    let managerRef;
+    if (mode === 'worker' && managerId) {
+      managerRef = doc(db, 'managers', managerId);
+    } else if (mode === 'admin') {
+      const user = auth.currentUser;
+      if (user) {
+        managerRef = doc(db, 'managers', user.uid);
+      } else {
+        console.error("User not authenticated.");
+        return;
+      }
+    } else {
+      console.error("Manager ID not found.");
+      return;
+    }
+
+    const scheduleCollectionRef = collection(managerRef, 'schedule');
+
+    try {
+      await addDoc(scheduleCollectionRef, {
+        ...block,
+        startDate: block.startDate.toISOString(),
+        endDate: block.endDate.toISOString(),
+      });
+    } catch (error) {
+      console.error("Error saving block to Firebase: ", error);
+    }
+  };
+
+  const deleteBlocksFromFirebase = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    let managerRef;
+    if (mode === 'worker' && managerId) {
+      managerRef = doc(db, 'managers', managerId);
+    } else if (mode === 'admin') {
+      managerRef = doc(db, 'managers', user.uid);
+    } else {
+      console.error("Manager ID not found.");
+      return;
+    }
+
+    const scheduleCollectionRef = collection(managerRef, 'schedule');
+    const q = query(scheduleCollectionRef, where('jobTitle', '==', selectedJobTitle));
+
+    try {
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach(async (doc) => {
+        await deleteDoc(doc.ref);
+      });
+    } catch (error) {
+      console.error("Error deleting blocks from Firebase: ", error);
+    }
   };
 
   const handleDeleteAll = () => {
     setBlocks([]);
-    saveBlocksToLocalStorage([]);
+    deleteBlocksFromFirebase();
   };
 
   const isValidName = (name) => /^[a-zA-Z\s]+$/.test(name);
@@ -262,7 +306,7 @@ const ScheduleBlockCreator = ({
               <button onClick={handleDoneClick} className="flex font-comfortaa font-semibold items-center space-x-2 bg-green-600 px-2 py-1 rounded-lg hover:bg-green-700 ml-2 border-2 border-transparent hover:border-green-500" disabled={mode === 'worker'}>
                 Done
               </button>
-              <button onClick={resetForm} className="font-comfortaa font-semibold text-red-600 hover:text-red-400 ml-8">
+              <button onClick={resetForm} className="font-comfortaa font-semibold text-red-600 hover:text-red-400 ml-7">
                 <AiOutlineClose size={24} />
               </button>
             </div>

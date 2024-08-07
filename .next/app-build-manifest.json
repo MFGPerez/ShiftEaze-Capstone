@@ -16,11 +16,6 @@
       "static/chunks/main-app.js",
       "static/chunks/app/punchInOut/page.js"
     ],
-    "/calendar/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/calendar/page.js"
-    ],
     "/contactManager/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -32,15 +27,20 @@
       "static/css/app/requestLeave/page.css",
       "static/chunks/app/requestLeave/page.js"
     ],
+    "/calendar/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/calendar/page.js"
+    ],
+    "/signin/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/signin/page.js"
+    ],
     "/dashboard/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/dashboard/page.js"
-    ],
-    "/workers/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/workers/page.js"
     ]
   }
 }

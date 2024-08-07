@@ -82,33 +82,43 @@ const Signup = () => {
           </p>
         </div>
         <div className="w-6/12 h-screen flex flex-col justify-center items-center bg-white bg-opacity-20 p-8 rounded-lg shadow-lg">
-          <h2 className="text-white text-4xl font-comfortaa font-bold mb-8">Manager Sign Up</h2>
+          <h2 className="text-white text-4xl font-comfortaa font-bold mb-8">
+            Sign Up
+          </h2>
           <form
             onSubmit={handleEmailSignup}
             className="flex flex-col items-center w-full max-w-xs"
           >
             <div className="mb-4 w-full">
-              <label className="block text-white font-comfortaa font-semibold mb-2">Email</label>
+              <label className="block text-white font-comfortaa font-semibold mb-2">
+                Email
+              </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className={`w-full px-4 py-2 rounded-md text-black focus:outline-none font-nixie ${
-                  error ? "border-red-500 bg-red-50 text-red-900 placeholder-red-700" : ""
+                  error
+                    ? "border-red-500 bg-red-50 text-red-900 placeholder-red-700"
+                    : ""
                 }`}
                 required
                 placeholder="yourEmail12@gmail.com"
               />
             </div>
             <div className="mb-6 w-full">
-              <label className="block text-white font-comfortaa font-semibold mb-2">Password</label>
+              <label className="block text-white font-comfortaa font-semibold mb-2">
+                Password
+              </label>
               <div className="relative">
                 <input
                   type={passwordVisible ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className={`w-full px-4 py-2 rounded-md text-black focus:outline-none font-nixie ${
-                    error ? "border-red-500 bg-red-50 text-red-900 placeholder-red-700" : ""
+                    error
+                      ? "border-red-500 bg-red-50 text-red-900 placeholder-red-700"
+                      : ""
                   }`}
                   required
                 />

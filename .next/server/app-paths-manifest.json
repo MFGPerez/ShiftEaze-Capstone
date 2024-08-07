@@ -1,5 +1,7 @@
 {
-  "/page": "app/page.js",
-  "/punchInOut/page": "app/punchInOut/page.js",
-  "/contactManager/page": "app/contactManager/page.js"
+  "/contactManager/page": "app/contactManager/page.js",
+  "/requestLeave/page": "app/requestLeave/page.js",
+  "/calendar/page": "app/calendar/page.js",
+  "/signin/page": "app/signin/page.js",
+  "/dashboard/page": "app/dashboard/page.js"
 }

@@ -2,7 +2,15 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import { getAuth } from "firebase/auth";
-import { getFirestore, collection, query, getDocs, addDoc, Timestamp, where } from "firebase/firestore";
+import {
+  getFirestore,
+  collection,
+  query,
+  getDocs,
+  addDoc,
+  Timestamp,
+  where,
+} from "firebase/firestore";
 import { useRouter, useSearchParams } from "next/navigation";
 import { firebaseApp } from "utils/firebase";
 import { TextField, Button, Box, Typography } from "@mui/material";
@@ -105,36 +113,52 @@ const RequestLeaveComponent = () => {
   const [workerName, setWorkerName] = useState("");
 
   useEffect(() => {
-    const fetchWorkerData = async () => {
-      if (!user) {
-        console.error("User not signed in");
-        return;
-      }
+    // Retrieve stored IDs
+    const storedManagerId = localStorage.getItem("managerId");
+    const storedWorkerName = localStorage.getItem("workerName");
 
-      try {
-        const managersQuery = query(collection(db, "managers"));
-        const managersSnapshot = await getDocs(managersQuery);
-
-        for (const managerDoc of managersSnapshot.docs) {
-          const workersQuery = query(
-            collection(db, "managers", managerDoc.id, "workers"),
-            where("email", "==", user.email)
-          );
-          const workersSnapshot = await getDocs(workersQuery);
-          if (!workersSnapshot.empty) {
-            const workerData = workersSnapshot.docs[0].data();
-            setManagerId(managerDoc.id);
-            setWorkerName(`${workerData.firstName} ${workerData.lastName}`);
-            break;
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching worker data: ", error);
-      }
-    };
-
-    fetchWorkerData();
+    if (storedManagerId && storedWorkerName) {
+      setManagerId(storedManagerId);
+      setWorkerName(storedWorkerName);
+    } else {
+      fetchWorkerData();
+    }
   }, [auth, db, user]);
+
+  const fetchWorkerData = async () => {
+    if (!user) {
+      console.error("User not signed in");
+      return;
+    }
+
+    try {
+      const managersQuery = query(collection(db, "managers"));
+      const managersSnapshot = await getDocs(managersQuery);
+
+      for (const managerDoc of managersSnapshot.docs) {
+        const workersQuery = query(
+          collection(db, "managers", managerDoc.id, "workers"),
+          where("email", "==", user.email)
+        );
+        const workersSnapshot = await getDocs(workersQuery);
+        if (!workersSnapshot.empty) {
+          const workerData = workersSnapshot.docs[0].data();
+          const managerId = managerDoc.id;
+          const workerName = `${workerData.firstName} ${workerData.lastName}`;
+
+          // Store IDs and workerName in local storage
+          localStorage.setItem("managerId", managerId);
+          localStorage.setItem("workerName", workerName);
+
+          setManagerId(managerId);
+          setWorkerName(workerName);
+          break;
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching worker data: ", error);
+    }
+  };
 
   const handleDateChange = (dates) => {
     setSelectedDates(dates);
@@ -150,7 +174,7 @@ const RequestLeaveComponent = () => {
         email: user.email,
         managerId: managerId,
         notes: notes,
-        selectedDates: selectedDates.map(date => Timestamp.fromDate(date)),
+        selectedDates: selectedDates.map((date) => Timestamp.fromDate(date)),
         timestamp: Timestamp.now(),
       });
       setStatus("Leave request sent successfully.");

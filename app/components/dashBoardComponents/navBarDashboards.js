@@ -60,12 +60,6 @@ const NavBarDashboard = () => {
           {profilePic && (
             <img src={profilePic} alt="Profile" className="w-8 h-8 rounded-full" />
           )}
-          <Link
-            href="/profile"
-            className=" font-comfortaa bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition-colors border-2 border-transparent hover:border-gray-400"
-          >
-            Profile
-          </Link>
           <button
             onClick={handleLogout}
             className=" font-comfortaa bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors border-2 border-transparent hover:border-red-400"
