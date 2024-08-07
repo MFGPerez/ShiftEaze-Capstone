@@ -167,7 +167,9 @@ const EditWorker = () => {
     <div className="min-h-screen bg-gradient-to-r from-blue-300 via-blue-600 to-blue-800 flex flex-col justify-center items-center text-white">
       <div className="bg-black opacity-85 p-10 rounded-lg shadow-lg w-full max-w-4xl">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-4xl font-comfortaa font-bold text-white">Edit Worker</h1>
+          <h1 className="text-4xl font-comfortaa font-bold text-white">
+            Edit Worker
+          </h1>
           <Link
             href="/workers"
             className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition-colors border-2 border-transparent hover:border-gray-400 font-comfortaa font-semibold"
@@ -213,7 +215,9 @@ const EditWorker = () => {
             </div>
             <div className="flex flex-wrap -mx-4">
               <div className="w-full md:w-1/2 px-4 mb-6">
-                <label className="block text-white font-comfortaa font-semibold">Email</label>
+                <label className="block text-white font-comfortaa font-semibold">
+                  Email
+                </label>
                 <input
                   type="email"
                   value={email}
@@ -223,7 +227,9 @@ const EditWorker = () => {
                 />
               </div>
               <div className="w-full md:w-1/2 px-4 mb-6">
-                <label className="block text-white font-comfortaa font-semibold">Passcode</label>
+                <label className="block text-white font-comfortaa font-semibold">
+                  Passcode
+                </label>
                 <input
                   type="text"
                   value={passcode}
@@ -235,7 +241,9 @@ const EditWorker = () => {
             </div>
             <div className="flex flex-wrap -mx-4">
               <div className="w-full md:w-1/2 px-4 mb-6">
-                <label className="block text-white font-comfortaa font-semibold">Position</label>
+                <label className="block text-white font-comfortaa font-semibold">
+                  Position
+                </label>
                 <input
                   type="text"
                   value={position}
@@ -271,7 +279,9 @@ const EditWorker = () => {
                 />
               </div>
               <div className="w-full px-4 mb-6">
-                <label className="block text-white font-comfortaa font-semibold">Address</label>
+                <label className="block text-white font-comfortaa font-semibold">
+                  Address
+                </label>
                 <input
                   type="text"
                   value={address}
@@ -283,7 +293,9 @@ const EditWorker = () => {
             </div>
             <div className="flex flex-wrap -mx-4">
               <div className="w-full md:w-1/3 px-4 mb-6">
-                <label className="block text-white font-comfortaa font-semibold">City</label>
+                <label className="block text-white font-comfortaa font-semibold">
+                  City
+                </label>
                 <input
                   type="text"
                   value={city}
@@ -293,7 +305,9 @@ const EditWorker = () => {
                 />
               </div>
               <div className="w-full md:w-1/3 px-4 mb-6">
-                <label className="block text-white font-comfortaa font-semibold">State</label>
+                <label className="block text-white font-comfortaa font-semibold">
+                  State
+                </label>
                 <input
                   type="text"
                   value={state}
@@ -317,7 +331,9 @@ const EditWorker = () => {
             </div>
             <div className="flex flex-wrap -mx-4">
               <div className="w-full md:w-1/2 px-4 mb-6">
-                <label className="block text-white font-comfortaa font-semibold">PIN</label>
+                <label className="block text-white font-comfortaa font-semibold">
+                  PIN
+                </label>
                 <div className="relative">
                   <input
                     type={pinVisible ? "text" : "password"}
